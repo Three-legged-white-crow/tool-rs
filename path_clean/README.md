@@ -11,14 +11,11 @@
 - windows64: `make windows64`
 
 
-### path_clean
+### usage
 ---
 
-*Delete files recursively while preserving the directory structure.*
+- `./pc -p aim_path -v` will delete files of `aim_path` recursively while preserving the directory structure
 
-
-### build
----
-
-- linux64: `make linux64`
-- windows64: `make windows64`
+- Usage of `./pc`:
+    - -p string directory that wait clean
+    - -v        show detail of clean
