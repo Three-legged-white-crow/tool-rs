@@ -17,11 +17,11 @@
 - `./path_clean -p aim_path -v` will delete files of `aim_path` recursively while preserving the directory structure
 
   ```
-  Path Clean v1.0
+  path_clean v1.0
   Delete files recursively while preserving the directory structure
   
   USAGE:
-      Path Clean [FLAGS] [OPTIONS]
+      path_clean [FLAGS] [OPTIONS]
   
   FLAGS:
       -h, --help       
