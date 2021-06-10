@@ -3,7 +3,7 @@ use clap::App;
 use clap::Arg;
 
 fn main() {
-    let flags = App::new("Path Clean")
+    let flags = App::new("path_clean")
         .version("v1.0")
         .about("Delete files recursively while preserving the directory structure")
 
