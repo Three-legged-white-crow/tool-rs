@@ -2,6 +2,10 @@ extern crate clap;
 use clap::App;
 use clap::Arg;
 
+use std::time::SystemTime;
+use std::time::Duration;
+use std::thread::sleep;
+
 fn main() {
     let flags = App::new("path_clean")
         .version("v1.0")
@@ -43,11 +47,32 @@ fn main() {
         show_detail = true
     }
 
+    let start_time = SystemTime::now();
+
     clean(clean_path, show_detail);
 
+    let end_time = SystemTime::now();
+
+    match end_time.duration_since(start_time) {
+        Ok(use_time) => {
+            println!("time use: {}", time_handle(use_time))
+        }
+
+        Err(err) => {
+            println!("time use: -")
+        }
+    }
+
+
+}
+
+fn time_handle(time_use: Duration) -> String {
+    let nano_time = time_use.as_nanos();
+    return nano_time.to_string();
 }
 
 // todo: clean file
 fn clean(clean_path: &str, show_detail: bool) {
-    println!("cleaning path: {}, show detail: {}", clean_path, show_detail)
+    println!("cleaning path: {}, show detail: {}", clean_path, show_detail);
+    sleep(Duration::new(1, 0));
 }
