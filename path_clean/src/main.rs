@@ -4,7 +4,9 @@ use clap::Arg;
 
 use std::time::SystemTime;
 use std::time::Duration;
-use std::thread::sleep;
+use std::path::Path;
+use std::io::{Error, ErrorKind};
+
 
 fn main() {
     let flags = App::new("path_clean")
@@ -26,9 +28,9 @@ fn main() {
 
     let mut flags_backup = flags.clone();
     let matches = flags.get_matches();
-    let mut clean_path = matches.value_of("path").unwrap_or("");
+    let mut clean_path_str = matches.value_of("path").unwrap_or("");
 
-    match clean_path {
+    match clean_path_str {
         "" => {
             println!();
             println!("[Error] must specify directiory that wait clean!");
@@ -37,7 +39,7 @@ fn main() {
             return;
         },
 
-        _ => clean_path = clean_path.trim_end_matches('/')
+        _ => clean_path_str = clean_path_str.trim_end_matches('/')
     }
 
     let num_verbose = matches.occurrences_of("verbose");
@@ -46,6 +48,8 @@ fn main() {
     if num_verbose > 0 {
         show_detail = true
     }
+
+    let clean_path = Path::new(clean_path_str);
 
     let start_time = SystemTime::now();
 
@@ -72,7 +76,35 @@ fn time_handle(time_use: Duration) -> String {
 }
 
 // todo: clean file
-fn clean(clean_path: &str, show_detail: bool) {
-    println!("cleaning path: {}, show detail: {}", clean_path, show_detail);
-    sleep(Duration::new(1, 0));
+fn clean(clean_path: &Path, show_detail: bool) -> Result<&str, Error> {
+
+    if !clean_path.is_dir() {
+        return Err(Error::new(ErrorKind::InvalidInput, "specify clean path is not a directory"));
+    }
+
+    for entry in clean_path.read_dir()? {
+        match entry {
+
+            Err(core) => {
+                // todo: add to failed list
+                println!("get err when read dir: {}", clean_path.to_str().unwrap());
+                continue
+            }
+
+            Ok(dir) => {
+                if dir.path().is_dir() {
+                    clean(dir.path().as_path(), show_detail);
+                    continue
+                }
+
+                println!("need rm file, path:{}", dir.path().to_str().unwrap());
+               
+                // fs::remove_file(dir)
+            }
+        }
+    }
+
+
+    return Ok("clean complate...");
+
 }
