@@ -6,6 +6,7 @@ use std::time::SystemTime;
 use std::time::Duration;
 use std::path::Path;
 use std::io::{Error, ErrorKind};
+use std::fs;
 
 
 fn main() {
@@ -92,14 +93,37 @@ fn clean(clean_path: &Path, show_detail: bool) -> Result<&str, Error> {
             }
 
             Ok(dir) => {
-                if dir.path().is_dir() {
-                    clean(dir.path().as_path(), show_detail);
+                let dir_path = dir.path();
+
+                if dir_path.is_dir() {
+                    clean(dir_path.as_path(), show_detail);
                     continue
                 }
 
-                println!("need rm file, path:{}", dir.path().to_str().unwrap());
+                let file_name = dir_path.to_str().unwrap_or("");
+                if file_name.len() == 0 {
+                    continue
+                }
+
+                println!("need rm file, path:{}", file_name);
                
-                // fs::remove_file(dir)
+                match fs::remove_file(file_name) {
+
+                    Err(_) => {
+                        // todo: add dir to failed list
+                        if show_detail {
+                            println!("[Remove File]Failed to remove file: {}", file_name)
+                        }
+
+                    }
+
+                    Ok(_) => {
+                        if show_detail {
+                            println!("[Remove File]Succeed to remove file: {}", file_name)
+                        }
+                    }
+
+                }
             }
         }
     }
