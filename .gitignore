@@ -13,5 +13,7 @@ Cargo.lock
 # Added by cargo
 
 .idea
+.fleet
 
 path_clean/target
+checksum/target

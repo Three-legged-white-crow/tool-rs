@@ -5,7 +5,7 @@ use clap::Arg;
 use std::time::SystemTime;
 use std::time::Duration;
 use std::path::Path;
-use std::io::{Error, ErrorKind};
+use std::io::Error;
 use std::fs;
 
 
@@ -34,7 +34,7 @@ fn main() {
     match clean_path_str {
         "" => {
             println!();
-            println!("[Error] must specify directiory that wait clean!");
+            println!("[Error] must specify directory that wait clean!");
             println!();
             flags_backup.print_long_help();
             return;
@@ -54,17 +54,22 @@ fn main() {
 
     let start_time = SystemTime::now();
 
-    clean(clean_path, show_detail);
+    let clean_res = clean(clean_path, &show_detail);
+    match clean_res {
+        Ok(msg) => {println!("{}", msg)}
+        Err(err) => {println!("get err when clean: {}", err)}
+    }
 
     let end_time = SystemTime::now();
 
     match end_time.duration_since(start_time) {
         Ok(use_time) => {
-            println!("time use: {}", time_handle(use_time))
+            println!("time use: {} ns", time_handle(use_time))
         }
 
         Err(err) => {
-            println!("time use: -")
+            println!("time use: -");
+            println!("occur err: {} when get time use", err)
         }
     }
 
@@ -77,18 +82,30 @@ fn time_handle(time_use: Duration) -> String {
 }
 
 // todo: clean file
-fn clean(clean_path: &Path, show_detail: bool) -> Result<&str, Error> {
+fn clean(clean_path: &Path, show_detail: &bool) -> Result<&'static str, Error> {
 
     if !clean_path.is_dir() {
-        return Err(Error::new(ErrorKind::InvalidInput, "specify clean path is not a directory"));
+        println!("clean aim: {} is file, direct remove", clean_path.to_str().unwrap());
+        match fs::remove_file(clean_path) {
+            Err(e) => {
+                println!("[Remove File]Failed to remove file: {}, and err: {}", clean_path.to_str().unwrap(), e);
+                return Err(e);
+            }
+
+            Ok(_) => {
+                println!("[Remove File]Succeed to remove file: {}", clean_path.to_str().unwrap());
+                return Ok("clean complete...");
+            }
+        }
     }
 
+    println!("clean aim: {} is directory, recursive remove file", clean_path.to_str().unwrap());
     for entry in clean_path.read_dir()? {
         match entry {
 
-            Err(core) => {
+            Err(e) => {
                 // todo: add to failed list
-                println!("get err when read dir: {}", clean_path.to_str().unwrap());
+                println!("[Clean Dir]Occur err: {}, when read dir: {}", e, clean_path.to_str().unwrap());
                 continue
             }
 
@@ -105,20 +122,20 @@ fn clean(clean_path: &Path, show_detail: bool) -> Result<&str, Error> {
                     continue
                 }
 
-                println!("need rm file, path:{}", file_name);
+                println!("[Clean Dir]Need rm file, path:{}", file_name);
                
                 match fs::remove_file(file_name) {
 
-                    Err(_) => {
+                    Err(e) => {
                         // todo: add dir to failed list
-                        if show_detail {
-                            println!("[Remove File]Failed to remove file: {}", file_name)
+                        if *show_detail {
+                            println!("[Remove File]Failed to remove file: {}, and err: {}", file_name, e)
                         }
 
                     }
 
                     Ok(_) => {
-                        if show_detail {
+                        if *show_detail {
                             println!("[Remove File]Succeed to remove file: {}", file_name)
                         }
                     }
@@ -129,6 +146,6 @@ fn clean(clean_path: &Path, show_detail: bool) -> Result<&str, Error> {
     }
 
 
-    return Ok("clean complate...");
+    return Ok("clean complete...");
 
 }
