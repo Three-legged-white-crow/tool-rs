@@ -36,7 +36,7 @@ fn main() {
             println!();
             println!("[Error] must specify directory that wait clean!");
             println!();
-            flags_backup.print_long_help();
+            _ = flags_backup.print_long_help();
             return;
         },
 
@@ -113,7 +113,19 @@ fn clean(clean_path: &Path, show_detail: &bool) -> Result<&'static str, Error> {
                 let dir_path = dir.path();
 
                 if dir_path.is_dir() {
-                    clean(dir_path.as_path(), show_detail);
+                    let clean_res = clean(dir_path.as_path(), show_detail);
+                    match clean_res {
+                        Ok(msg) => {
+                            if *show_detail {
+                                println!("[Clean Dir]Succeed to clean dir: {}, msg: {}", dir_path.to_str().unwrap(), msg)
+                            }
+                        }
+                        Err(err) => {
+                            if *show_detail {
+                                println!("[Clean Dir]Failed to clean dir: {}, and err: {}", dir_path.to_str().unwrap(), err)
+                            }
+                        }
+                    }
                     continue
                 }
 
