@@ -86,15 +86,15 @@ fn clean(clean_path: &Path, show_detail: &bool) -> Result<&'static str, Error> {
 
     if !clean_path.is_dir() {
         println!("clean aim: {} is file, direct remove", clean_path.to_str().unwrap());
-        match fs::remove_file(clean_path) {
+        return match fs::remove_file(clean_path) {
             Err(e) => {
                 println!("[Remove File]Failed to remove file: {}, and err: {}", clean_path.to_str().unwrap(), e);
-                return Err(e);
+                Err(e)
             }
 
             Ok(_) => {
                 println!("[Remove File]Succeed to remove file: {}", clean_path.to_str().unwrap());
-                return Ok("clean complete...");
+                Ok("clean complete...")
             }
         }
     }
